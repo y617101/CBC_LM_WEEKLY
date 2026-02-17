@@ -154,17 +154,23 @@ def extract_repay_usd_from_cash_flows(pos):
     # 1) total_debt を最優先（最新timestampのもの）
     latest = None
     latest_ts = -1
-    for cf in cfs:
-        
-            continue
-        t = _lower(cf.get("type"))
-        if t not in ("lendor-borrow", "lendor-repay"):
-            continue
-        td = to_f(cf.get("total_debt"))
-        ts = to_f(cf.get("timestamp")) or 0
-        if td is not None and ts >= latest_ts:
-            latest_ts = ts
-            latest = td
+    
+for cf in cfs:
+    if not isinstance(cf, dict):
+        continue
+
+    t = _lower(cf.get("type"))
+    if t not in ("lendor-borrow", "lendor-repay"):
+        continue
+
+    td = to_f(cf.get("total_debt"))
+    ts = to_f(cf.get("timestamp")) or 0
+
+    if td is not None and ts >= latest_ts:
+        latest_ts = ts
+        latest = td
+
+
 
     if latest is not None:
         return max(float(latest), 0.0)
