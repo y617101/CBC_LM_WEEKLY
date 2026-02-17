@@ -333,12 +333,9 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
     start_ts = start_dt.timestamp()
     end_ts = end_dt.timestamp()
 
-    print("DBG 7D pos_list type:", type(pos_list), "len:", (len(pos_list) if isinstance(pos_list, list) else "not_list"))
-
     total = 0.0
     tx_count = 0
     dbg_types = set()
-    dbg_cfs_seen = 0
 
     for pos in (pos_list or []):
         if not isinstance(pos, dict):
@@ -348,8 +345,6 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
         if not isinstance(cfs, list):
             continue
 
-        dbg_cfs_seen += len(cfs)
-
         for cf in cfs:
             if not isinstance(cf, dict):
                 continue
@@ -358,6 +353,7 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
             if t:
                 dbg_types.add(t)
 
+            # ★ ここ重要：continueの下にコードを書かない
             if t != "claimed-fees":
                 continue
 
@@ -389,10 +385,9 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
             total += usd
             tx_count += 1
 
-    print("DBG 7D cfs_seen:", dbg_cfs_seen)
-    print("DBG 7D types:", sorted(list(dbg_types))[:40])
-
+    print("DBG 7D types:", sorted(list(dbg_types)))
     return total, tx_count
+
 
 
 
