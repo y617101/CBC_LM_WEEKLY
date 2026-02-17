@@ -371,7 +371,7 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
 
             if t != "claimed-fees":
                 
-            print("CLAIM TS:", ts, flush=True)
+                print("CLAIM TS:", ts, flush=True)
 
                 continue
                 # ★ここ追加（最初の3件だけ）
