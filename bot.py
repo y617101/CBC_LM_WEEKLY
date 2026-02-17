@@ -328,48 +328,6 @@ def resolve_symbol(pos, which):
                     return m
 
     return "TOKEN"
-    
-def calc_fee_usd_7d(pos_list, start_dt, end_dt):
-    start_ts = start_dt.timestamp()
-    end_ts = end_dt.timestamp()
-
-    total = 0.0
-    tx_count = 0
-
-    for pos in (pos_list or []):
-        cash_flows = pos.get("cash_flows") or []
-
-        for cf in cash_flows:
-            if (cf or {}).get("type") != "fees-collected":
-                continue
-
-            # DBG（1回だけ）
-            if os.environ.get("DBG_CF_PRINTED", "0") != "1":
-                print("DBG fees-collected sample:", str(cf)[:1200])
-                os.environ["DBG_CF_PRINTED"] = "1"
-
-            t = cf.get("timestamp")
-            if t is None:
-                continue
-
-            try:
-                ts = float(t)
-                if ts > 1e12:
-                    ts = ts / 1000.0
-            except:
-                continue
-
-            if not (start_ts <= ts < end_ts):
-                continue
-
-            usd = to_f(cf.get("value_usd") or 0.0)
-            if usd <= 0:
-                continue
-
-            total += usd
-            tx_count += 1
-
-    return total, tx_count
 
 
 
