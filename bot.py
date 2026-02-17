@@ -371,35 +371,37 @@ def main():
     mode = os.environ.get("REPORT_MODE", "daily").strip().lower()
 
     if mode == "weekly":
-    start, end = weekly_window_rolling()
-    safe = os.environ.get("SAFE_ADDRESS", "SAFE_NOT_SET")
 
-    positions_open = fetch_positions(safe, active=True)
-    positions_exited = fetch_positions(safe, active=False)
+        start, end = weekly_window_rolling()
+        safe = os.environ.get("SAFE_ADDRESS", "SAFE_NOT_SET")
+    
+        positions_open = fetch_positions(safe, active=True)
+        positions_exited = fetch_positions(safe, active=False)
+    
+        pos_list_open = positions_open if isinstance(positions_open, list) else positions_open.get("data", [])
+        pos_list_exited = positions_exited if isinstance(positions_exited, list) else positions_exited.get("data", [])
+    
+        fee_open, tx_open = calc_fee_usd_7d(pos_list_open, start, end)
+        fee_exited, tx_exited = calc_fee_usd_7d(pos_list_exited, start, end)
+    
+        fee_total = fee_open + fee_exited
+        tx_total = tx_open + tx_exited
+    
+        send_telegram(
+            "\n".join([
+                "CBC Liquidity Mining — Weekly (ROLLING TEST v2)",
+                f"Period End: {end.strftime('%Y-%m-%d %H:%M')} JST",
+                "────────────────",
+                "SAFE",
+                safe,
+                "",
+                f"・7d確定手数料 ${fee_total:,.2f}",
+                f"・Transactions {tx_total}",
+                f"・Period {start.strftime('%Y-%m-%d %H:%M')} → {end.strftime('%Y-%m-%d %H:%M')} JST",
+            ])
+        )
+        return
 
-    pos_list_open = positions_open if isinstance(positions_open, list) else positions_open.get("data", [])
-    pos_list_exited = positions_exited if isinstance(positions_exited, list) else positions_exited.get("data", [])
-
-    fee_open, tx_open = calc_fee_usd_7d(pos_list_open, start, end)
-    fee_exited, tx_exited = calc_fee_usd_7d(pos_list_exited, start, end)
-
-    fee_total = fee_open + fee_exited
-    tx_total = tx_open + tx_exited
-
-    send_telegram(
-        "\n".join([
-            "CBC Liquidity Mining — Weekly (ROLLING TEST)",
-            f"Period End: {end.strftime('%Y-%m-%d %H:%M')} JST",
-            "────────────────",
-            "SAFE",
-            safe,
-            "",
-            f"・7d確定手数料 ${fee_total:,.2f}",
-            f"・Transactions {tx_total}",
-            f"・Period {start.strftime('%Y-%m-%d %H:%M')} → {end.strftime('%Y-%m-%d %H:%M')} JST",
-        ])
-    )
-    return
 
     # ここから下は今までのDaily処理をそのまま置く
     report = build_daily_report()
