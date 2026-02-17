@@ -344,6 +344,11 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
         for cf in cfs:
             if not isinstance(cf, dict):
                 continue
+                
+            print("DBG types:", cf.get("type"))   # ←ここに入れる
+            
+            if str(cf.get("type") or "").strip().lower() != "fees-collected":
+                continue
 
             if str(cf.get("type") or "").strip().lower() != "fees-collected":
                 continue
