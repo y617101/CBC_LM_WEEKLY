@@ -346,11 +346,16 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
         for cf in cfs:
             if not isinstance(cf, dict):
                 continue
+    t = str(cf.get("type") or "").strip().lower()
 
-            t = str(cf.get("type") or "").strip().lower()
-            
-            if t != "claimed-fees":
-                continue
+    # DBG: claimed-fees を見つけたら中身を見る
+    if t == "claimed-fees":
+        ts_raw = cf.get("timestamp")
+        usd_raw = cf.get("amount_usd")
+        print("DBG claimed-fees raw:", "ts=", ts_raw, "usd=", usd_raw)
+
+    if t != "claimed-fees":
+        continue
 
 
             ts = cf.get("timestamp")
