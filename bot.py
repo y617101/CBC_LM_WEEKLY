@@ -345,8 +345,7 @@ for cf in cash_flows:
         print("DBG fees-collected sample:", str(cf)[:1200])
         os.environ["DBG_CF_PRINTED"] = "1"
     # --- DBG end ---
-
-    t = cf.get("timestamp")
+        t = cf.get("tmestamp")
 
 
 
