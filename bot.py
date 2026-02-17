@@ -263,16 +263,15 @@ for cf in cfs:
 
     amt_usd = to_f(cf.get("amount_usd"))
 
-            # 無ければ prices + amount0/1系で推定
-            if amt_usd is None:
-                prices = cf.get("prices") or {}
-                p0 = to_f((prices.get("token0") or {}).get("usd")) or 0.0
-                p1 = to_f((prices.get("token1") or {}).get("usd")) or 0.0
+    # 無ければ prices + amount0/1系で推定
+    if amt_usd is None:
+        prices = cf.get("prices") or {}
+        p0 = to_f((prices.get("token0") or {}).get("usd")) or 0.0
+        p1 = to_f((prices.get("token1") or {}).get("usd")) or 0.0
+        q0 = to_f(cf.get("collected_fees_token0")) or to_f(cf.get("claimed_token0")) or to_f(cf.get("fees0")) or to_f(cf.get("amount0")) or 0.0
+        q1 = to_f(cf.get("collected_fees_token1")) or to_f(cf.get("claimed_token1")) or to_f(cf.get("fees1")) or to_f(cf.get("amount1")) or 0.0
 
-                q0 = to_f(cf.get("collected_fees_token0")) or to_f(cf.get("claimed_token0")) or to_f(cf.get("fees0")) or to_f(cf.get("amount0")) or 0.0
-                q1 = to_f(cf.get("collected_fees_token1")) or to_f(cf.get("claimed_token1")) or to_f(cf.get("fees1")) or to_f(cf.get("amount1")) or 0.0
-
-                amt_usd = abs(q0) * p0 + abs(q1) * p1
+    amt_usd = abs(q0) * p0 + abs(q1) * p1
 
             # ガード
             try:
