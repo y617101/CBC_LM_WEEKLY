@@ -239,6 +239,11 @@ def calc_fee_usd_24h_from_cash_flows(pos_list_all, now_dt):
             if not isinstance(cf, dict):
                 continue
 
+            t = str(cf.get("type") or "").strip().lower()
+            if t:
+                dbg_types.add(t)
+
+
             t = _lower(cf.get("type"))
             if t:
                 dbg_types.add(t)
@@ -323,6 +328,9 @@ def resolve_symbol(pos, which):
     return "TOKEN"
 
 def calc_fee_usd_7d(pos_list, start_dt, end_dt):
+    dbg_types = set()
+    dbg_inwindow = set()
+
     start_ts = start_dt.timestamp()
     end_ts = end_dt.timestamp()
 
