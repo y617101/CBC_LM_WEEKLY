@@ -332,6 +332,10 @@ def resolve_symbol(pos, which):
 
 def main():
 
+    start, end = weekly_window_rolling()
+    print("DBG WEEKLY WINDOW:", start, "->", end)
+
+
     safe = os.environ.get("SAFE_ADDRESS", "SAFE_NOT_SET")
     if safe == "SAFE_NOT_SET":
         send_telegram("SAFE\nSAFE_NOT_SET\n\nSAFE_ADDRESS をRenderのEnvironment Variablesに入れてね")
