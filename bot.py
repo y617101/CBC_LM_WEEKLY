@@ -241,11 +241,14 @@ def calc_fee_usd_24h_from_cash_flows(pos_list_all, now_dt):
         if not isinstance(cfs, list):
             continue
 
-        for cf in cfs:
-            
-                continue
+    for cf in cfs:
+        if not isinstance(cf, dict):
+            continue
+        
+        t = str(cf.get("type") or "").strip().lower()
+         # ここから下はあなたの既存ロジック（type判定・timestamp窓・amount_usd集計）を入れる
 
-            t = str(cf.get("type") or "").strip().lower()
+            
             if t:
                 dbg_types.add(t)
 
