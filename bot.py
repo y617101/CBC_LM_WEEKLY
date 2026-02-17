@@ -345,17 +345,23 @@ def main():
         pos_list_exited = positions_exited if isinstance(positions_exited, list) else positions_exited.get("data", [])
 
         # DBG: positionsの形を1回だけ見る
+    # DBG: positionsの形を1回だけ見る
     if os.environ.get("DBG_POS_PRINTED", "0") != "1":
         print("DBG open count:", len(pos_list_open) if isinstance(pos_list_open, list) else "not_list")
-    if isinstance(pos_list_open, list) and len(pos_list_open) > 0:
-        p0 = pos_list_open[0]
-        print("DBG pos keys:", list(p0.keys())[:60])
-        cf = p0.get("cash_flows")
-        print("DBG cash_flows type:", type(cf), "len:", (len(cf) if isinstance(cf, list) else "n/a"))
-        if isinstance(cf, list) and len(cf) > 0:
-            print("DBG cash_flow[0] keys:", list(cf[0].keys())[:60])
-            print("DBG cash_flow[0] sample:", str(cf[0])[:1200])
-            os.environ["DBG_POS_PRINTED"] = "1"
+
+        if isinstance(pos_list_open, list) and len(pos_list_open) > 0:
+            p0 = pos_list_open[0]
+            print("DBG pos keys:", list(p0.keys())[:60])
+
+            cf = p0.get("cash_flows")
+            print("DBG cash_flows type:", type(cf), "len:", (len(cf) if isinstance(cf, list) else "n/a"))
+
+            if isinstance(cf, list) and len(cf) > 0:
+                print("DBG cash_flow[0] keys:", list(cf[0].keys())[:60])
+                print("DBG cash_flow[0] sample:", str(cf[0])[:1200])
+
+        os.environ["DBG_POS_PRINTED"] = "1"
+
 
 
         fee_open, tx_open = calc_fee_usd_7d(pos_list_open, start, end)
