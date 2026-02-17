@@ -336,19 +336,17 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
     total = 0.0
     tx_count = 0
 
-for cf in cash_flows:
-    if (cf or {}).get("type") != "fees-collected":
-        continue
+    for pos in (pos_list or []):
+        cash_flows = pos.get("cash_flows") or []
 
-    # --- DBG: fees-collectedの形を1回だけ見る ---
-    if os.environ.get("DBG_CF_PRINTED", "0") != "1":
-        print("DBG fees-collected sample:", str(cf)[:1200])
-        os.environ["DBG_CF_PRINTED"] = "1"
-    # --- DBG end ---
-        t = cf.get("tmestamp")
+        for cf in cash_flows:
+            if (cf or {}).get("type") != "fees-collected":
+                continue
 
-
-
+            # DBG（1回だけ）
+            if os.environ.get("DBG_CF_PRINTED", "0") != "1":
+                print("DBG fees-collected sample:", str(cf)[:1200])
+                os.environ["DBG_CF_PRINTED"] = "1"
 
             t = cf.get("timestamp")
             if t is None:
@@ -357,7 +355,7 @@ for cf in cash_flows:
             try:
                 ts = float(t)
                 if ts > 1e12:
-                    ts /= 1000.0
+                    ts = ts / 1000.0
             except:
                 continue
 
@@ -372,6 +370,7 @@ for cf in cash_flows:
             tx_count += 1
 
     return total, tx_count
+
 
 
 def main():
