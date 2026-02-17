@@ -261,9 +261,8 @@ for cf in cfs:
     if ts_dt < start_dt or ts_dt >= end_dt:
         continue
 
+    amt_usd = to_f(cf.get("amount_usd"))
 
-            # まずUSD直があれば優先
-            amt_usd = to_f(cf.get("amount_usd"))
 
             # 無ければ prices + amount0/1系で推定
             if amt_usd is None:
