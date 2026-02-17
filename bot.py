@@ -141,9 +141,6 @@ def calc_net_usd(pos):
 
 
 
-
-
-
 def calc_fee_apr_a(fee_24h_usd, net_usd):
     if fee_24h_usd is None or net_usd is None or net_usd <= 0:
         return None
@@ -200,10 +197,6 @@ def extract_repay_usd_from_cash_flows(pos):
 
     debt = borrow_usd - repay_usd
     return debt if debt > 0 else 0.0
-
-
-
-
 
 
 
@@ -378,6 +371,57 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
 
 
 def main():
+
+def calc_fee_usd_7d(pos_list, start_dt, end_dt):
+    start_ts = start_dt.timestamp()
+    end_ts = end_dt.timestamp()
+
+    total = 0.0
+    tx_count = 0
+
+    for pos in (pos_list or []):
+        cfs = pos.get("cash_flows") or []
+        if not isinstance(cfs, list):
+            continue
+
+        for cf in cfs:
+            if not isinstance(cf, dict):
+                continue
+
+            # 7d確定手数料は fees-collected だけ
+            if str(cf.get("type") or "").strip().lower() != "fees-collected":
+                continue
+
+            ts = cf.get("timestamp")
+            if ts is None:
+                continue
+            try:
+                ts = float(ts)
+                if ts > 1e12:
+                    ts /= 1000.0
+            except:
+                continue
+
+            if not (start_ts <= ts < end_ts):
+                continue
+
+            usd = to_f(cf.get("amount_usd"), 0.0)  # ←ログで確定
+            try:
+                usd = float(usd)
+            except:
+                continue
+
+            if usd < 0:
+                usd = -usd
+            if usd == 0:
+                continue
+
+            total += usd
+            tx_count += 1
+
+    return total, tx_count
+
+    
     mode = os.environ.get("REPORT_MODE", "daily").strip().lower()
     safe = os.environ.get("SAFE_ADDRESS", "SAFE_NOT_SET")
 
