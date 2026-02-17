@@ -348,11 +348,10 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
                 continue
 
             t = str(cf.get("type") or "").strip().lower()
-            if t:
-                dbg_types.add(t)
-
-            if t != "fees-collected":
+            
+            if t != "claimed-fees":
                 continue
+
 
             ts = cf.get("timestamp")
             if ts is None:
