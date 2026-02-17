@@ -241,52 +241,46 @@ def calc_fee_usd_24h_from_cash_flows(pos_list_all, now_dt):
         if not isinstance(cfs, list):
             continue
 
-        for cf in cfs:
-            if not isinstance(cf, dict):
-                continue
+    # ===== claimed-fees (7d) 集計 =====
+for cf in cfs:
+    if not isinstance(cf, dict):
+        continue
 
-            t = str(cf.get("type") or "").strip().lower()
-            if t:
-                dbg_types.add(t)
+    t = str(cf.get("type") or "").strip().lower()
+    if t != "claimed-fees":
+        continue
 
-            if not any(k in t for k in ("fee", "collect", "claim")):
-                continue
+    ts = _to_ts_sec(cf.get("timestamp"))
+    if ts is None:
+        continue
 
-            ts = _to_ts_sec(cf.get("timestamp"))
-            if ts is None:
-                continue
+    ts_dt = datetime.fromtimestamp(ts, JST)
+    if ts_dt < start_dt or ts_dt >= end_dt:
+        continue
 
-            ts_dt = datetime.fromtimestamp(ts, JST)
-            if ts_dt < start_dt or ts_dt >= end_dt:
-                continue
+    amt_usd = to_f(cf.get("amount_usd"))
 
-            # まずUSD直があれば優先
-            amt_usd = to_f(cf.get("amount_usd"))
+    if amt_usd is None:
+        prices = cf.get("prices") or {}
+        p0 = to_f((prices.get("token0") or {}).get("usd")) or 0.0
+        p1 = to_f((prices.get("token1") or {}).get("usd")) or 0.0
 
-            # 無ければ prices + amount0/1系で推定
-            if amt_usd is None:
-                prices = cf.get("prices") or {}
-                p0 = to_f((prices.get("token0") or {}).get("usd")) or 0.0
-                p1 = to_f((prices.get("token1") or {}).get("usd")) or 0.0
+        q0 = to_f(cf.get("claimed_token0")) or to_f(cf.get("fees0")) or 0.0
+        q1 = to_f(cf.get("claimed_token1")) or to_f(cf.get("fees1")) or 0.0
 
-                q0 = to_f(cf.get("collected_fees_token0")) or to_f(cf.get("claimed_token0")) or to_f(cf.get("fees0")) or to_f(cf.get("amount0")) or 0.0
-                q1 = to_f(cf.get("collected_fees_token1")) or to_f(cf.get("claimed_token1")) or to_f(cf.get("fees1")) or to_f(cf.get("amount1")) or 0.0
+        amt_usd = abs(q0) * p0 + abs(q1) * p1
 
-                amt_usd = abs(q0) * p0 + abs(q1) * p1
+    try:
+        amt_usd = float(amt_usd)
+    except Exception:
+        continue
 
-            # ガード
-            try:
-                amt_usd = float(amt_usd)
-            except Exception:
-                continue
-            if not (amt_usd > 0):
-                continue
+    if amt_usd <= 0:
+        continue
 
-            total += amt_usd
-            total_count += 1
-            fee_by_nft[nft_id] = fee_by_nft.get(nft_id, 0.0) + amt_usd
-            count_by_nft[nft_id] = count_by_nft.get(nft_id, 0) + 1
-
+    total += amt_usd
+    tx_count += 1
+    fee_by_nft[nft_id] = fee_by_nft.get(nft_id, 0.0) + amt_usd
 
     return total, total_count, fee_by_nft, count_by_nft, start_dt, end_dt
 
