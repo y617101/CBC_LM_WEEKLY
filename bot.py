@@ -328,6 +328,42 @@ def resolve_symbol(pos, which):
                     return m
 
     return "TOKEN"
+    
+def calc_fee_usd_7d(pos_list, start_dt, end_dt):
+    start_ts = start_dt.timestamp()
+    end_ts = end_dt.timestamp()
+
+    total = 0.0
+    tx_count = 0
+
+    for pos in (pos_list or []):
+        cash_flows = pos.get("cash_flows") or []
+        for cf in cash_flows:
+            if (cf or {}).get("type") != "fees-collected":
+                continue
+
+            t = cf.get("timestamp")
+            if t is None:
+                continue
+
+            try:
+                ts = float(t)
+                if ts > 1e12:
+                    ts /= 1000.0
+            except:
+                continue
+
+            if not (start_ts <= ts < end_ts):
+                continue
+
+            usd = to_f(cf.get("value_usd") or 0.0)
+            if usd <= 0:
+                continue
+
+            total += usd
+            tx_count += 1
+
+    return total, tx_count
 
 
 def main():
@@ -335,21 +371,35 @@ def main():
     mode = os.environ.get("REPORT_MODE", "daily").strip().lower()
 
     if mode == "weekly":
-        start, end = weekly_window_rolling()
-        safe = os.environ.get("SAFE_ADDRESS", "SAFE_NOT_SET")
+    start, end = weekly_window_rolling()
+    safe = os.environ.get("SAFE_ADDRESS", "SAFE_NOT_SET")
 
-        send_telegram(
-            "\n".join([
-                "CBC Liquidity Mining — Weekly (ROLLING TEST)",
-                f"Period End: {end.strftime('%Y-%m-%d %H:%M')} JST",
-                "────────────────",
-                "SAFE",
-                safe,
-                "",
-                f"・Period {start.strftime('%Y-%m-%d %H:%M')} → {end.strftime('%Y-%m-%d %H:%M')} JST",
-            ])
-        )
-        return
+    positions_open = fetch_positions(safe, active=True)
+    positions_exited = fetch_positions(safe, active=False)
+
+    pos_list_open = positions_open if isinstance(positions_open, list) else positions_open.get("data", [])
+    pos_list_exited = positions_exited if isinstance(positions_exited, list) else positions_exited.get("data", [])
+
+    fee_open, tx_open = calc_fee_usd_7d(pos_list_open, start, end)
+    fee_exited, tx_exited = calc_fee_usd_7d(pos_list_exited, start, end)
+
+    fee_total = fee_open + fee_exited
+    tx_total = tx_open + tx_exited
+
+    send_telegram(
+        "\n".join([
+            "CBC Liquidity Mining — Weekly (ROLLING TEST)",
+            f"Period End: {end.strftime('%Y-%m-%d %H:%M')} JST",
+            "────────────────",
+            "SAFE",
+            safe,
+            "",
+            f"・7d確定手数料 ${fee_total:,.2f}",
+            f"・Transactions {tx_total}",
+            f"・Period {start.strftime('%Y-%m-%d %H:%M')} → {end.strftime('%Y-%m-%d %H:%M')} JST",
+        ])
+    )
+    return
 
     # ここから下は今までのDaily処理をそのまま置く
     report = build_daily_report()
