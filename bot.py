@@ -241,27 +241,19 @@ def calc_fee_usd_24h_from_cash_flows(pos_list_all, now_dt):
         if not isinstance(cfs, list):
             continue
 
-    for cf in cfs:
-        if not isinstance(cf, dict):
-            continue
-        
-        t = str(cf.get("type") or "").strip().lower()
-         # ここから下はあなたの既存ロジック（type判定・timestamp窓・amount_usd集計）を入れる
+for cf in cfs:
+    if not isinstance(cf, dict):
+        continue
+
+    t = str(cf.get("type") or "").strip().lower()
+
+    if t:
+        dbg_types.add(t)
+
+    if not any(k in t for k in ("fee", "collect", "claim")):
+        continue
 
             
-            if t:
-                dbg_types.add(t)
-
-
-            t = _lower(cf.get("type"))
-            if t:
-                dbg_types.add(t)
-
-            # ✅ いまはまず「確定手数料type候補」を見つけたいので、
-            #    ここは一旦ゆるくして、fee/collect/claim を含むものだけ拾ってDBGする
-            if not any(k in t for k in ("fee", "collect", "claim")):
-                continue
-
             ts = _to_ts_sec(cf.get("timestamp"))
             if ts is None:
                 continue
