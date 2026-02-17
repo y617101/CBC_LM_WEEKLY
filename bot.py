@@ -334,25 +334,26 @@ def main():
 
     mode = os.environ.get("REPORT_MODE", "daily").strip().lower()
 
-if mode == "weekly":
-    start, end = weekly_window_rolling()
-    safe = os.environ.get("SAFE_ADDRESS", "SAFE_NOT_SET")
-    send_telegram(
-        "\n".join([
-            "CBC Liquidity Mining — Weekly (ROLLING TEST)",
-            f"Period End: {end.strftime('%Y-%m-%d %H:%M')} JST",
-            "────────────────",
-            "SAFE",
-            safe,
-            "",
-            f"・Period {start.strftime('%Y-%m-%d %H:%M')} → {end.strftime('%Y-%m-%d %H:%M')} JST",
-        ])
-    )
-    return
+    if mode == "weekly":
+        start, end = weekly_window_rolling()
+        safe = os.environ.get("SAFE_ADDRESS", "SAFE_NOT_SET")
 
+        send_telegram(
+            "\n".join([
+                "CBC Liquidity Mining — Weekly (ROLLING TEST)",
+                f"Period End: {end.strftime('%Y-%m-%d %H:%M')} JST",
+                "────────────────",
+                "SAFE",
+                safe,
+                "",
+                f"・Period {start.strftime('%Y-%m-%d %H:%M')} → {end.strftime('%Y-%m-%d %H:%M')} JST",
+            ])
+        )
+        return
 
-    start, end = weekly_window_rolling()
-    print("DBG WEEKLY WINDOW:", start, "->", end)
+    # ここから下は今までのDaily処理をそのまま置く
+    report = build_daily_report()
+    send_telegram(report)
 
 
     safe = os.environ.get("SAFE_ADDRESS", "SAFE_NOT_SET")
