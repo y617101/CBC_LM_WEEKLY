@@ -350,42 +350,6 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
     if t != "claimed-fees":
         continue
 
-    ts = cf.get("timestamp")
-    if ts is None:
-        continue
-
-    print("CLAIM TS:", ts, flush=True)
-
-
-            try:
-                ts = float(ts)
-                if ts > 1e12:
-                    ts /= 1000.0
-            except:
-                continue
-
-            if not (start_ts <= ts < end_ts):
-                continue
-
-            usd = cf.get("amount_usd")
-            try:
-                usd = float(usd)
-            except:
-                continue
-
-            if usd < 0:
-                usd = -usd
-            if usd == 0:
-                continue
-
-            total += usd
-            tx_count += 1
-
-    print("DBG 7D types:", sorted(list(dbg_types)))
-    return total, tx_count
-
-
-
 
 
 def main():
