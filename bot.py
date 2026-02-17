@@ -336,6 +336,8 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
     total = 0.0
     tx_count = 0
 
+    dbg_types = set()
+
     for pos in (pos_list or []):
         cfs = pos.get("cash_flows") or []
         if not isinstance(cfs, list):
@@ -344,19 +346,17 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
         for cf in cfs:
             if not isinstance(cf, dict):
                 continue
-                
-            print("DBG types:", cf.get("type"))   # ←ここに入れる
-            
-            if str(cf.get("type") or "").strip().lower() != "fees-collected":
-                continue
 
-            if str(cf.get("type") or "").strip().lower() != "fees-collected":
+            t = str(cf.get("type") or "").strip().lower()
+            if t:
+                dbg_types.add(t)
+
+            if t != "fees-collected":
                 continue
 
             ts = cf.get("timestamp")
             if ts is None:
                 continue
-
             try:
                 ts = float(ts)
                 if ts > 1e12:
@@ -367,12 +367,26 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
             if not (start_ts <= ts < end_ts):
                 continue
 
-            amt = float(cf.get("amount_usd") or 0)
-            if amt > 0:
-                total += amt
-                tx_count += 1
+            usd = cf.get("amount_usd")
+            try:
+                usd = float(usd)
+            except:
+                continue
+
+            usd = abs(usd)
+            if usd == 0:
+                continue
+
+            total += usd
+            tx_count += 1
+
+    # 1回だけtypesを出す（fees-collectedが本当にあるか確認用）
+    if os.environ.get("DBG_7D_TYPES_PRINTED", "0") != "1":
+        print("DBG 7D types:", sorted(list(dbg_types))[:80], flush=True)
+        os.environ["DBG_7D_TYPES_PRINTED"] = "1"
 
     return total, tx_count
+
 
 
 def main():
