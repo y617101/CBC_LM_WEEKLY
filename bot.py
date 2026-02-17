@@ -329,40 +329,71 @@ def resolve_symbol(pos, which):
 
     return "TOKEN"
 
+def calc_fee_usd_7d(pos_list, start_dt, end_dt):
+    start_ts = start_dt.timestamp()
+    end_ts = end_dt.timestamp()
+
+    total = 0.0
+    tx_count = 0
+
+    for pos in (pos_list or []):
+        cfs = pos.get("cash_flows") or []
+        if not isinstance(cfs, list):
+            continue
+
+        for cf in cfs:
+            if not isinstance(cf, dict):
+                continue
+            if str(cf.get("type") or "").strip().lower() != "fees-collected":
+                continue
+
+            ts = cf.get("timestamp")
+            if ts is None:
+                continue
+            try:
+                ts = float(ts)
+                if ts > 1e12:
+                    ts /= 1000.0
+            except:
+                continue
+
+            if not (start_ts <= ts < end_ts):
+                continue
+
+            usd = to_f(cf.get("amount_usd"), 0.0)  # ←ログで確定: amount_usd
+            try:
+                usd = float(usd)
+            except:
+                continue
+
+            if usd < 0:
+                usd = -usd
+            if usd == 0:
+                continue
+
+            total += usd
+            tx_count += 1
+
+    return total, tx_count
 
 
 def main():
     mode = os.environ.get("REPORT_MODE", "daily").strip().lower()
+    safe = os.environ.get("SAFE_ADDRESS", "SAFE_NOT_SET")
 
+    if safe == "SAFE_NOT_SET":
+        send_telegram("SAFE\nSAFE_NOT_SET\n\nSAFE_ADDRESS をRenderのEnvironment Variablesに入れてね")
+        return
+
+    # ---------- WEEKLY ----------
     if mode == "weekly":
         start, end = weekly_window_rolling()
-        safe = os.environ.get("SAFE_ADDRESS", "SAFE_NOT_SET")
 
         positions_open = fetch_positions(safe, active=True)
         positions_exited = fetch_positions(safe, active=False)
 
         pos_list_open = positions_open if isinstance(positions_open, list) else positions_open.get("data", [])
         pos_list_exited = positions_exited if isinstance(positions_exited, list) else positions_exited.get("data", [])
-
-        # DBG: positionsの形を1回だけ見る
-    # DBG: positionsの形を1回だけ見る
-    if os.environ.get("DBG_POS_PRINTED", "0") != "1":
-        print("DBG open count:", len(pos_list_open) if isinstance(pos_list_open, list) else "not_list")
-
-        if isinstance(pos_list_open, list) and len(pos_list_open) > 0:
-            p0 = pos_list_open[0]
-            print("DBG pos keys:", list(p0.keys())[:60])
-
-            cf = p0.get("cash_flows")
-            print("DBG cash_flows type:", type(cf), "len:", (len(cf) if isinstance(cf, list) else "n/a"))
-
-            if isinstance(cf, list) and len(cf) > 0:
-                print("DBG cash_flow[0] keys:", list(cf[0].keys())[:60])
-                print("DBG cash_flow[0] sample:", str(cf[0])[:1200])
-
-        os.environ["DBG_POS_PRINTED"] = "1"
-
-
 
         fee_open, tx_open = calc_fee_usd_7d(pos_list_open, start, end)
         fee_exited, tx_exited = calc_fee_usd_7d(pos_list_exited, start, end)
@@ -385,7 +416,7 @@ def main():
         )
         return
 
-    # Daily
+    # ---------- DAILY ----------
     report = build_daily_report()
     send_telegram(report)
 
