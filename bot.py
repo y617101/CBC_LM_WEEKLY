@@ -333,6 +333,10 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
     start_ts = start_dt.timestamp()
     end_ts = end_dt.timestamp()
 
+    print("7D START:", start_ts, flush=True)
+    print("7D END:", end_ts, flush=True)
+
+
     total = 0.0
     tx_count = 0
     dbg_types = set()
@@ -345,15 +349,30 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
         if not isinstance(cfs, list):
             continue
 
-        for cf in cfs:
-            if not isinstance(cf, dict):
-                continue
+    for cf in cfs:
+    if not isinstance(cf, dict):
+        continue
 
-            t = str(cf.get("type") or "").strip().lower()
-            if t:
-                dbg_types.add(t)
+    t = str(cf.get("type") or "").strip().lower()
+    if t:
+        dbg_types.add(t)
+
+    # claimed-fees を見つけたら1回だけ中身を見る
+    if t == "claimed-fees" and os.environ.get("DBG_CLAIMED_PRINTED", "0") != "1":
+        print("DBG claimed sample:", str(cf)[:1200], flush=True)
+        os.environ["DBG_CLAIMED_PRINTED"] = "1"
+
+    if t != "claimed-fees":
+        continue
+
+    # ↓ここから timestamp / amount_usd の集計に入る
+
+
 
             if t != "claimed-fees":
+                
+            print("CLAIM TS:", ts, flush=True)
+
                 continue
                 # ★ここ追加（最初の3件だけ）
             if os.environ.get("DBG_CLAIMED_PRINTED", "0") != "1":
