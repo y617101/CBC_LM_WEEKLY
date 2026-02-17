@@ -263,7 +263,6 @@ for cf in cfs:
 
     amt_usd = to_f(cf.get("amount_usd"))
 
-
             # 無ければ prices + amount0/1系で推定
             if amt_usd is None:
                 prices = cf.get("prices") or {}
