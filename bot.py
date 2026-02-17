@@ -512,10 +512,12 @@ def main():
    
 
     report = (
-        "CBC Liquidity Mining — Daily\n"
+        "CBC Liquidity Mining — Weekly (ROLLING TEST v2)",
         f"Period End: {end_dt.strftime('%Y-%m-%d %H:%M')} JST\n"
         "────────────────\n"
         f"SAFE\n{safe}\n\n"
+        f"・7d確定手数料 ${fee_total:,.2f}",
+        f"・Transactions {tx_total}",
         f"・24h確定手数料 {fmt_money(fee_usd)}\n"
         f"・Fee APR(SAFE) {fmt_pct(safe_fee_apr)}\n"
         f"・Net合算 {fmt_money(net_total)}\n"
