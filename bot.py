@@ -350,7 +350,7 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
             continue
 
     for cf in cfs:
-    if not isinstance(cf, dict):
+        if not isinstance(cf, dict):
         continue
 
     t = str(cf.get("type") or "").strip().lower()
