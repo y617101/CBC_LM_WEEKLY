@@ -1,6 +1,18 @@
 import os
 import requests
 
+from datetime import datetime, timedelta, timezone
+
+JST = timezone(timedelta(hours=9))
+
+def weekly_window_rolling():
+    now = datetime.now(JST)
+    today_9 = now.replace(hour=9, minute=0, second=0, microsecond=0)
+    end = today_9 if now >= today_9 else (today_9 - timedelta(days=1))
+    start = end - timedelta(days=7)
+    return start, end
+
+
 # ================================
 # Token Symbol Map (Base)
 # ================================
