@@ -332,7 +332,7 @@ def resolve_symbol(pos, which):
 
 def main():
 
-mode = os.environ.get("REPORT_MODE", "daily").strip().lower()
+    mode = os.environ.get("REPORT_MODE", "daily").strip().lower()
 
 if mode == "weekly":
     start, end = weekly_window_rolling()
