@@ -376,8 +376,8 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
                 continue
                 # ★ここ追加（最初の3件だけ）
             if os.environ.get("DBG_CLAIMED_PRINTED", "0") != "1":
-            print("DBG claimed sample:", str(cf)[:1200])
-            os.environ["DBG_CLAIMED_PRINTED"] = "1"
+                print("DBG claimed sample:", str(cf)[:1200])
+                os.environ["DBG_CLAIMED_PRINTED"] = "1"
 
 
             ts = cf.get("timestamp")
