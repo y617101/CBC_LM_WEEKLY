@@ -350,39 +350,19 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
             continue
 
     for cf in cfs:
-        
-        continue
+        if not isinstance(cf, dict):
+            continue
 
     t = str(cf.get("type") or "").strip().lower()
-    if t:
-        dbg_types.add(t)
-
-    # claimed-fees を見つけたら1回だけ中身を見る
-    if t == "claimed-fees" and os.environ.get("DBG_CLAIMED_PRINTED", "0") != "1":
-        print("DBG claimed sample:", str(cf)[:1200], flush=True)
-        os.environ["DBG_CLAIMED_PRINTED"] = "1"
-
     if t != "claimed-fees":
         continue
 
-    # ↓ここから timestamp / amount_usd の集計に入る
+    ts = cf.get("timestamp")
+    if ts is None:
+        continue
 
+    print("CLAIM TS:", ts, flush=True)
 
-
-            if t != "claimed-fees":
-                
-                print("CLAIM TS:", ts, flush=True)
-
-                continue
-                # ★ここ追加（最初の3件だけ）
-            if os.environ.get("DBG_CLAIMED_PRINTED", "0") != "1":
-                print("DBG claimed sample:", str(cf)[:1200])
-                os.environ["DBG_CLAIMED_PRINTED"] = "1"
-
-
-            ts = cf.get("timestamp")
-            if ts is None:
-                continue
 
             try:
                 ts = float(ts)
