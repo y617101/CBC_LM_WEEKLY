@@ -155,7 +155,7 @@ def extract_repay_usd_from_cash_flows(pos):
     latest = None
     latest_ts = -1
     for cf in cfs:
-        if not isinstance(cf, dict):
+        
             continue
         t = _lower(cf.get("type"))
         if t not in ("lendor-borrow", "lendor-repay"):
@@ -174,7 +174,7 @@ def extract_repay_usd_from_cash_flows(pos):
     repay_usd = 0.0
 
     for cf in cfs:
-        if not isinstance(cf, dict):
+        
             continue
         t = _lower(cf.get("type"))
         if t not in ("lendor-borrow", "lendor-repay"):
@@ -236,7 +236,7 @@ def calc_fee_usd_24h_from_cash_flows(pos_list_all, now_dt):
             continue
 
         for cf in cfs:
-            if not isinstance(cf, dict):
+            
                 continue
 
             t = str(cf.get("type") or "").strip().lower()
@@ -350,7 +350,7 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
             continue
 
     for cf in cfs:
-        if not isinstance(cf, dict):
+        
         continue
 
     t = str(cf.get("type") or "").strip().lower()
