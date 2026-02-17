@@ -376,10 +376,7 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
             tx_count += 1
 
     return total, tx_count
-
-
-def main():
-
+    
 def calc_fee_usd_7d(pos_list, start_dt, end_dt):
     start_ts = start_dt.timestamp()
     end_ts = end_dt.timestamp()
@@ -396,13 +393,13 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
             if not isinstance(cf, dict):
                 continue
 
-            # 7d確定手数料は fees-collected だけ
             if str(cf.get("type") or "").strip().lower() != "fees-collected":
                 continue
 
             ts = cf.get("timestamp")
             if ts is None:
                 continue
+
             try:
                 ts = float(ts)
                 if ts > 1e12:
@@ -413,21 +410,15 @@ def calc_fee_usd_7d(pos_list, start_dt, end_dt):
             if not (start_ts <= ts < end_ts):
                 continue
 
-            usd = to_f(cf.get("amount_usd"), 0.0)  # ←ログで確定
-            try:
-                usd = float(usd)
-            except:
-                continue
-
-            if usd < 0:
-                usd = -usd
-            if usd == 0:
-                continue
-
-            total += usd
-            tx_count += 1
+            amt = float(cf.get("amount_usd") or 0)
+            if amt > 0:
+                total += amt
+                tx_count += 1
 
     return total, tx_count
+
+
+def main():
 
     
     mode = os.environ.get("REPORT_MODE", "daily").strip().lower()
