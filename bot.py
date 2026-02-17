@@ -253,14 +253,14 @@ for cf in cfs:
     if not any(k in t for k in ("fee", "collect", "claim")):
         continue
 
-            
-            ts = _to_ts_sec(cf.get("timestamp"))
-            if ts is None:
-                continue
+    ts = _to_ts_sec(cf.get("timestamp"))
+    if ts is None:
+        continue
 
-            ts_dt = datetime.fromtimestamp(ts, JST)
-            if ts_dt < start_dt or ts_dt >= end_dt:
-                continue
+    ts_dt = datetime.fromtimestamp(ts, JST)
+    if ts_dt < start_dt or ts_dt >= end_dt:
+        continue
+
 
             # まずUSD直があれば優先
             amt_usd = to_f(cf.get("amount_usd"))
